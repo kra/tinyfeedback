@@ -216,28 +216,16 @@ class Controller(object):
         graph_type = request.args.get('graph_type', '')
         timescale = request.args.get('timescale', '')
 
-        if title == '' or graph_type == '' or timescale == '' or \
-                len(request.args) == 3:
-
+        if (title == '' or graph_type == '' or timescale == '' or 
+            len(request.args) == 3):
             request.setResponseCode(400)
-            request.finish()
+            return 'Bad arguments'
 
-        keys = request.args.keys()
-
-        index = keys.index('title')
-        del keys[index]
-
-        index = keys.index('graph_type')
-        del keys[index]
-
-        index = keys.index('timescale')
-        del keys[index]
-
+        keys = [key for key in request.args.keys() if key not in
+                ('title', 'graph_type', 'timescale')]
         graph = model.get_data_for_graph(self.__SessionMaker, title,
                 graph_type, keys, timescale)
-
         template = self.__template_lookup.get_template('graph.mako')
-
         return template.render(username=username, title=title,
                 graph_type=graph_type, components=keys, graph=[graph])
 
